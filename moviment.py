@@ -15,7 +15,6 @@ while True:
 
 total_cartoes = 0.0
 
-
 relatorio_maquinas = {
     'Rede': {},
     'Mercado Pago': {},
@@ -23,11 +22,11 @@ relatorio_maquinas = {
 }
 
 print("\n--- LANÇAMENTO DE CARTÕES ---")
-print("(Digite 'sair' na máquina de cartão para encerrar os cartões)")
+print("(Digite 'sair' na máquina de cartão para encerrar totalmente os cartões)")
 
 while True:
     maquina_input = input("\nMáquina de cartão (Rede, Mercado Pago, Infinite Pay ou 'sair'): ").strip()
-    
+        
     if maquina_input.lower() == 'sair':
         break
         
@@ -41,33 +40,46 @@ while True:
     else:
         print("Opção inválida. Digite Rede, Mercado Pago, Infinite Pay ou sair.")
         continue
+        
+    print(f"\n=> Lançando vendas na máquina: {maquina} <=")
+    print("(Digite 'sair' na forma de pagamento para trocar de máquina)")
 
-    cartao = input("Forma de pagamento (deb, cred, vr ou 'sair'): ").strip().lower()
-    if cartao == 'sair':
-        break
-    if cartao not in ['deb', 'cred', 'vr']:
-        print("Opção inválida. Digite deb, cred, vr ou sair.")
-        continue
-        
-    bandeira = input("Digite a bandeira (Master, Visa, Elo, etc.): ").strip().upper() if cartao != 'vr' else 'VR'
-    
-    try:
-        v_cart = float(input(f"Valor passado no {cartao.upper()} ({bandeira}) na {maquina}: R$ "))
-        
+    while True:
+        cartao = input("\nForma de pagamento (deb, cred, vr, PIX ou 'sair'): ").strip().lower()
+        if cartao == 'sair':
+            print(f"Saindo da máquina {maquina}...")
+            break
+            
+        if cartao not in ['deb', 'cred', 'vr', 'pix']:
+            print("Opção inválida. Digite deb, cred, vr, PIX ou sair.")
+            continue
+            
         if cartao == 'vr':
-            id_venda = "VR"
+            bandeira = 'VR'
+        elif cartao == 'pix':
+            bandeira = 'PIX'
         else:
-            id_venda = f"{cartao.upper()} - {bandeira}"
+            bandeira = input("Digite a bandeira (Master, Visa, Elo, etc.): ").strip().upper()
+        
+        try:
+            v_cart = float(input(f"Valor passado no {cartao.upper()} ({bandeira}) na {maquina}: R$ "))
             
-        if id_venda in relatorio_maquinas[maquina]:
-            relatorio_maquinas[maquina][id_venda] += v_cart
-        else:
-            relatorio_maquinas[maquina][id_venda] = v_cart
-            
-        total_cartoes += v_cart
-        print(f"-> R$ {v_cart:.2f} adicionados à máquina {maquina}.")
-    except ValueError:
-        print("Valor inválido! Cartão não computado. Tente novamente.")
+            if cartao == 'vr':
+                id_venda = "VR"
+            elif cartao == 'pix':
+                id_venda = "PIX"
+            else:
+                id_venda = f"{cartao.upper()} - {bandeira}"
+                
+            if id_venda in relatorio_maquinas[maquina]:
+                relatorio_maquinas[maquina][id_venda] += v_cart
+            else:
+                relatorio_maquinas[maquina][id_venda] = v_cart
+                
+            total_cartoes += v_cart
+            print(f"-> R$ {v_cart:.2f} adicionados à máquina {maquina}.")
+        except ValueError:
+            print("Valor inválido! Cartão não computado. Tente novamente.")
 
 total_sangrias = 0.0
 print("\n--- LANÇAMENTO DE SANGRIAS (SAÍDAS) ---")
@@ -85,18 +97,15 @@ while True:
     except ValueError:
         print("Valor inválido! Sangria não computada. Tente novamente.")
 
-# CÁLCULOS FINAIS
 subtotal = abertura + vendas - total_sangrias
 total_caixa_dinheiro = subtotal - total_cartoes
 
 data_atual = datetime.datetime.now().strftime("%d/%m/%Y às %H:%M")
 
-# EMISSÃO DO RELATÓRIO
 print("\n" + "=" * 45)
 print(f"        FECHAMENTO DE CAIXA ({data_atual})")
 print("=" * 45)
 
-# 1. PARTE NOVA: DETALHAMENTO POR MÁQUINA
 print("   DETALHAMENTO POR MÁQUINA DE CARTÃO")
 print("-" * 45)
 for maq, vendas_maq in relatorio_maquinas.items():
@@ -111,7 +120,6 @@ for maq, vendas_maq in relatorio_maquinas.items():
         print(f"   * Total {maq}: R$ {subtotal_maq:.2f}")
     print("-" * 45)
 
-# 2. RELATÓRIO GERAL
 print("\n" + "=" * 45)
 print("               RESUMO GERAL")
 print("=" * 45)
